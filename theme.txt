@@ -1,0 +1,35 @@
+# GRUB Theme Configuration
+
+# Background Image
++ background_image: "background.png"
+
+# Font Settings
++ terminal_font: "PixelOperator"
+
+# Colors
++ title_color: "white"
++ highlight_color: "yellow"
++ normal_color: "light-gray"
+
+# Menu Settings
++ menu {
+    width: 60%;      # Menu width
+    height: 50%;     # Menu height
+    horizontal-align: center;
+    vertical-align: center;
+    item_height: 40px;
+    selected_item_color: yellow;
+    normal_item_color: light-gray;
+}
+
+# Text Box for Welcome Message
++ textbox {
+    text: "Welcome to Grubtale!"
+    x: 50%;           # Centered horizontally
+    y: 10%;           # Positioned near the top
+    width: 80%;
+    height: 40px;
+    font: "PixelOperator";
+    font-size: 32px;
+    color: white;
+}
