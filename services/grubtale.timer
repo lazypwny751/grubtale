@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Grubtale Background Update
+Requires=grubtale.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

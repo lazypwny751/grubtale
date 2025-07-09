@@ -1,0 +1,15 @@
+[Unit]
+Description=Grubtale Theme Background Generator
+Documentation=https://github.com/lazypwny751/grubtale
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/usr/local/share/grubtale
+ExecStart=/usr/local/share/grubtale/grubtale.sh generate
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

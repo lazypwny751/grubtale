@@ -1,0 +1,24 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Grubtale Theme Manager
+Comment=Manage your Undertale-inspired GRUB theme
+Exec=gnome-terminal -- bash -c "cd /usr/local/share/grubtale && ./grubtale.sh help; read -p 'Press Enter to continue...'"
+Icon=/usr/local/share/grubtale/assets/icon.png
+Terminal=true
+StartupNotify=true
+Categories=System;Settings;
+Keywords=grub;theme;undertale;boot;manager;
+Actions=Preview;Install;Uninstall;
+
+[Desktop Action Preview]
+Name=Preview Theme
+Exec=gnome-terminal -- bash -c "cd /usr/local/share/grubtale && ./grubtale.sh preview; read -p 'Press Enter to continue...'"
+
+[Desktop Action Install]
+Name=Install Theme
+Exec=pkexec bash -c "cd /usr/local/share/grubtale && ./grubtale.sh install"
+
+[Desktop Action Uninstall]
+Name=Uninstall Theme
+Exec=pkexec bash -c "cd /usr/local/share/grubtale && ./grubtale.sh uninstall"
