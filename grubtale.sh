@@ -10,6 +10,9 @@
 
 set -e
 
+# Configuration
+SERVICE_TYPE="systemd"  # Default service type (systemd or sysvinit)
+
 # Undertale quotes adapted for Linux/GRUB
 QUOTATION=(
     "You're gonna have a bad boot."
@@ -55,6 +58,7 @@ GRUB_THEMES_DIR="/boot/grub/themes"
 THEME_NAME="grubtale"
 BACKGROUND_IMAGE="castle.png"
 INSTALL_DIR="${GRUB_THEMES_DIR}/${THEME_NAME}"
+SERVICE_TYPE="systemd"  # Default service type
 
 # Colors for output
 RED='\033[0;31m'
@@ -80,48 +84,142 @@ print_logo() {
     echo
 }
 
-check_dependencies() {
-    local deps=("convert" "identify")
-    local missing=()
+generate_dynamic_theme() {
+    local theme_dir="$1"
     
-    for dep in "${deps[@]}"; do
-        if ! command -v "$dep" &> /dev/null; then
-            missing+=("$dep")
-        fi
-    done
+    echo -e "${BLUE}Generating dynamic theme configuration...${NC}"
     
-    if [[ ${#missing[@]} -gt 0 ]]; then
-        echo -e "${RED}Missing dependencies: ${missing[*]}${NC}"
-        echo -e "${YELLOW}Please install ImageMagick: sudo apt install imagemagick${NC}"
-        exit 1
-    fi
+    # Get minimal system info
+    local packages=$(dpkg-query -f '${binary:Package}\n' -W 2>/dev/null | wc -l || echo "0")
+    local os_info=$(lsb_release -d 2>/dev/null | cut -f2 || echo "GNU/Linux")
+    local cpu_cores=$(nproc 2>/dev/null || echo "Unknown")
+    local quote="${QUOTATION[$RANDOM % ${#QUOTATION[@]}]}"
+    local current_date=$(date "+%B %d, %Y")
+    
+    # Truncate long strings for 720p display
+    local os_short="${os_info:0:25}"
+    [[ ${#os_info} -gt 25 ]] && os_short="${os_short}..."
+    
+    local quote_short="${quote:0:45}"
+    [[ ${#quote} -gt 45 ]] && quote_short="${quote_short}..."
+    
+    # Generate clean and compact theme.txt for 720p (1280x720)
+    cat > "$theme_dir/theme.txt" << EOF
+# GRUB2 Theme - Grubtale (Compact) - 720p Format
+# An Undertale-inspired GRUB theme with clean layout
+# Generated on: $current_date
+
+# Background settings
+desktop-image: "background.png"
+desktop-color: "#000000"
+
+# Title - Top left
++ label {
+  left = 30
+  top = 30
+  align = "left"
+  font = "determination_mono 24"
+  color = "#FFD700"
+  text = "GRUBTALE"
 }
 
-generate_background() {
-    local input_image="$1"
-    local output_image="$2"
+# System info block - Bottom left
++ label {
+  left = 30
+  top = 620
+  align = "left"
+  font = "determination_mono 14"
+  color = "#FFFFFF"
+  text = "OS: $os_short"
+}
+
++ label {
+  left = 30
+  top = 640
+  align = "left"
+  font = "determination_mono 14"
+  color = "#FFFFFF"
+  text = "Packages: $packages"
+}
+
++ label {
+  left = 30
+  top = 660
+  align = "left"
+  font = "determination_mono 14"
+  color = "#FFFFFF"
+  text = "CPU Cores: $cpu_cores"
+}
+
+# Random quote - Top center
++ label {
+  left = 640
+  top = 30
+  align = "center"
+  font = "determination_mono 16"
+  color = "#FFFF00"
+  text = "$quote_short"
+}
+
+# Determination message - Bottom right
++ label {
+  left = 1250
+  top = 680
+  align = "right"
+  font = "determination_mono 14"
+  color = "#FFD700"
+  text = "* Stay determined."
+}
+
+# Update timestamp - Top right
++ label {
+  left = 1250
+  top = 10
+  align = "right"
+  font = "determination_mono 12"
+  color = "#888888"
+  text = "$current_date"
+}
+
+# Boot menu - Centered
++ boot_menu {
+  left = 320
+  top = 180
+  width = 640
+  height = 360
+  item_font = "determination_mono 16"
+  selected_item_font = "determination_mono 16"
+  item_color = "#CCCCCC"
+  selected_item_color = "#FFFFFF"
+  item_height = 32
+  item_padding = 8
+  item_spacing = 4
+  icon_width = 24
+  icon_height = 24
+  scrollbar = true
+  scrollbar_width = 16
+  scrollbar_thumb = "#FFD700"
+  scrollbar_frame = "#444444"
+}
+
+# Numeric countdown - Bottom center (no progress bar)
++ label {
+  id = "__timeout__"
+  left = 640
+  top = 580
+  align = "center"
+  font = "determination_mono 18"
+  color = "#FFD700"
+  text = "Auto boot in: %d"
+}
+
+# Font definitions
+title-font: "determination_mono 18"
+message-font: "determination_mono 16"
+terminal-font: "determination_mono 14"
+EOF
     
-    echo -e "${BLUE}Generating background image...${NC}"
-    
-    # Get system info
-    local packages=$(dpkg-query -f '${binary:Package}\n' -W 2>/dev/null | wc -l || echo "Unknown")
-    local kernel=$(uname -r)
-    local uptime=$(uptime -p 2>/dev/null || echo "Unknown")
-    local quote="${QUOTATION[$RANDOM % ${#QUOTATION[@]}]}"
-    
-    # Generate the background with overlay text
-    convert "images/${input_image}" \
-        -font "fonts/PixelOperator.ttf" \
-        -pointsize 32 -fill white -stroke black -strokewidth 1 \
-        -gravity North -annotate +0+60 "$quote" \
-        -pointsize 20 -fill yellow \
-        -gravity Southwest -annotate +20+120 "Kernel: $kernel" \
-        -gravity Southwest -annotate +20+90 "Packages: $packages" \
-        -gravity Southwest -annotate +20+60 "Uptime: $uptime" \
-        -gravity Southeast -annotate +20+30 "* You feel determined." \
-        "$output_image"
-    
-    echo -e "${GREEN}Background generated: $output_image${NC}"
+    echo -e "${GREEN}Dynamic theme configuration generated: $theme_dir/theme.txt${NC}"
 }
 
 create_theme_structure() {
@@ -134,95 +232,180 @@ create_theme_structure() {
     # Copy fonts
     cp -r fonts/ "$theme_dir/"
     
-    # Copy and update theme.txt
-    sed "s/background.png/background.png/" theme.txt > "$theme_dir/theme.txt"
+    # Copy background image directly
+    cp "images/$BACKGROUND_IMAGE" "$theme_dir/background.png"
+    
+    # Generate dynamic theme.txt with current system info
+    generate_dynamic_theme "$theme_dir"
     
     echo -e "${GREEN}Theme structure created${NC}"
 }
 
-install_theme() {
-    echo -e "${BLUE}Installing Grubtale theme...${NC}"
+install_service() {
+    local service_type="$1"
     
-    # Check if running as root
-    if [[ $EUID -ne 0 ]]; then
-        echo -e "${RED}This operation requires root privileges.${NC}"
-        echo -e "${YELLOW}Please run: sudo $0 install${NC}"
-        exit 1
-    fi
+    echo -e "${BLUE}Installing $service_type service...${NC}"
     
-    # Create directories
-    mkdir -p "$INSTALL_DIR"
+    # Create grubtale directory in /usr/local/share
+    mkdir -p /usr/local/share/grubtale
     
-    # Generate background
-    generate_background "$BACKGROUND_IMAGE" "background.png"
+    # Copy necessary files
+    cp grubtale.sh /usr/local/share/grubtale/
+    cp -r fonts/ /usr/local/share/grubtale/
+    cp -r images/ /usr/local/share/grubtale/
+    chmod +x /usr/local/share/grubtale/grubtale.sh
     
-    # Create theme structure
-    create_theme_structure "$INSTALL_DIR"
+    # Create update script
+    cat > /usr/local/share/grubtale/update-theme.sh << 'EOF'
+#!/bin/bash
+# Grubtale theme updater
+cd /usr/local/share/grubtale
+./grubtale.sh update-theme
+EOF
+    chmod +x /usr/local/share/grubtale/update-theme.sh
     
-    # Copy background
-    cp background.png "$INSTALL_DIR/"
-    
-    # Update GRUB configuration
-    if [[ -f "/etc/default/grub" ]]; then
-        echo -e "${BLUE}Updating GRUB configuration...${NC}"
+    if [[ "$service_type" == "systemd" ]]; then
+        # Install systemd service
+        cat > /etc/systemd/system/grubtale.service << EOF
+[Unit]
+Description=Grubtale Theme Updater
+Documentation=https://github.com/lazypwny751/grubtale
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/usr/local/share/grubtale
+ExecStart=/usr/local/share/grubtale/update-theme.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
         
-        # Backup original config
-        cp /etc/default/grub /etc/default/grub.backup.$(date +%Y%m%d_%H%M%S)
+        systemctl daemon-reload
+        systemctl enable grubtale.service
+        echo -e "${GREEN}SystemD service installed and enabled${NC}"
         
-        # Update or add theme line
-        if grep -q "GRUB_THEME=" /etc/default/grub; then
-            sed -i "s|^GRUB_THEME=.*|GRUB_THEME=\"$INSTALL_DIR/theme.txt\"|" /etc/default/grub
-        else
-            echo "GRUB_THEME=\"$INSTALL_DIR/theme.txt\"" >> /etc/default/grub
+    elif [[ "$service_type" == "sysvinit" ]]; then
+        # Install SysVInit script
+        cp services/grubtale-sysvinit /etc/init.d/grubtale
+        chmod +x /etc/init.d/grubtale
+        
+        # Enable service based on distribution
+        if command -v update-rc.d &>/dev/null; then
+            update-rc.d grubtale defaults
+        elif command -v chkconfig &>/dev/null; then
+            chkconfig --add grubtale
+            chkconfig grubtale on
         fi
         
-        # Update GRUB
-        update-grub
-        
-        echo -e "${GREEN}Grubtale theme installed successfully!${NC}"
-        echo -e "${YELLOW}Reboot to see the theme in action.${NC}"
-    else
-        echo -e "${RED}GRUB configuration file not found!${NC}"
-        exit 1
+        echo -e "${GREEN}SysVInit service installed and enabled${NC}"
+    fi
+    
+    echo -e "${YELLOW}Service will update theme on every boot${NC}"
+}
+
+uninstall_service() {
+    echo -e "${BLUE}Uninstalling services...${NC}"
+    
+    # Stop and disable systemd service
+    if systemctl is-enabled grubtale.service &>/dev/null; then
+        systemctl disable grubtale.service 2>/dev/null || true
+        systemctl stop grubtale.service 2>/dev/null || true
+        rm -f /etc/systemd/system/grubtale.service
+        systemctl daemon-reload
+        echo -e "${GREEN}SystemD service removed${NC}"
+    fi
+    
+    # Remove SysVInit service
+    if [[ -f "/etc/init.d/grubtale" ]]; then
+        if command -v update-rc.d &>/dev/null; then
+            update-rc.d grubtale remove
+        elif command -v chkconfig &>/dev/null; then
+            chkconfig grubtale off
+            chkconfig --del grubtale
+        fi
+        rm -f /etc/init.d/grubtale
+        echo -e "${GREEN}SysVInit service removed${NC}"
+    fi
+    
+    # Remove application directory
+    rm -rf /usr/local/share/grubtale
+    
+    echo -e "${GREEN}All services uninstalled${NC}"
+}
+
+update_theme() {
+    # This function is called by the service to update the theme
+    if [[ -d "$INSTALL_DIR" ]]; then
+        echo "Updating Grubtale theme..."
+        generate_dynamic_theme "$INSTALL_DIR"
+        update-grub 2>/dev/null || grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null || true
+        echo "Grubtale theme updated successfully"
     fi
 }
 
-uninstall_theme() {
-    echo -e "${BLUE}Uninstalling Grubtale theme...${NC}"
+install() {
+    check_root
     
-    if [[ $EUID -ne 0 ]]; then
-        echo -e "${RED}This operation requires root privileges.${NC}"
-        echo -e "${YELLOW}Please run: sudo $0 uninstall${NC}"
-        exit 1
+    echo -e "${YELLOW}Installing Grubtale GRUB theme...${NC}"
+    
+    # Install theme
+    create_theme_structure "$INSTALL_DIR"
+    
+    # Install service (default: systemd)
+    install_service "$SERVICE_TYPE"
+    
+    # Update GRUB configuration to use the theme
+    if grep -q "GRUB_THEME=" /etc/default/grub; then
+        sed -i "s|^GRUB_THEME=.*|GRUB_THEME=\"$INSTALL_DIR/theme.txt\"|" /etc/default/grub
+    else
+        echo "GRUB_THEME=\"$INSTALL_DIR/theme.txt\"" >> /etc/default/grub
     fi
+    
+    # Update GRUB
+    echo -e "${BLUE}Updating GRUB configuration...${NC}"
+    update-grub 2>/dev/null || grub-mkconfig -o /boot/grub/grub.cfg
+    
+    echo -e "${GREEN}Grubtale theme installed successfully!${NC}"
+    echo -e "${YELLOW}The theme will be automatically updated on every boot.${NC}"
+    echo -e "${YELLOW}Reboot to see the new theme.${NC}"
+}
+
+uninstall() {
+    check_root
+    
+    echo -e "${YELLOW}Uninstalling Grubtale GRUB theme...${NC}"
+    
+    # Uninstall services
+    uninstall_service
     
     # Remove theme directory
     if [[ -d "$INSTALL_DIR" ]]; then
         rm -rf "$INSTALL_DIR"
-        echo -e "${GREEN}Theme files removed${NC}"
+        echo -e "${GREEN}Theme directory removed${NC}"
     fi
     
-    # Restore GRUB config
-    if [[ -f "/etc/default/grub" ]]; then
+    # Remove GRUB_THEME from configuration
+    if grep -q "GRUB_THEME=" /etc/default/grub; then
         sed -i '/^GRUB_THEME=/d' /etc/default/grub
-        update-grub
-        echo -e "${GREEN}GRUB configuration restored${NC}"
+        echo -e "${GREEN}GRUB configuration updated${NC}"
     fi
+    
+    # Update GRUB
+    echo -e "${BLUE}Updating GRUB configuration...${NC}"
+    update-grub 2>/dev/null || grub-mkconfig -o /boot/grub/grub.cfg
     
     echo -e "${GREEN}Grubtale theme uninstalled successfully!${NC}"
+    echo -e "${YELLOW}Reboot to see the default GRUB theme.${NC}"
 }
 
-preview_theme() {
-    echo -e "${BLUE}Generating preview...${NC}"
-    generate_background "$BACKGROUND_IMAGE" "preview.png"
-    echo -e "${GREEN}Preview generated: preview.png${NC}"
-    
-    if command -v feh &> /dev/null; then
-        feh preview.png &
-    elif command -v eog &> /dev/null; then
-        eog preview.png &
-    else
-        echo -e "${YELLOW}Install 'feh' or 'eog' to auto-open the preview${NC}"
+check_root() {
+    if [[ $EUID -ne 0 ]]; then
+        echo -e "${RED}This operation requires root privileges.${NC}"
+        echo -e "${YELLOW}Please run: sudo $0 $1${NC}"
+        exit 1
     fi
 }
 
@@ -231,14 +414,12 @@ show_help() {
     echo -e "${CYAN}Usage: $0 [OPTION]${NC}"
     echo
     echo -e "${GREEN}Options:${NC}"
-    echo -e "  ${YELLOW}install${NC}     Install the Grubtale theme (requires root)"
-    echo -e "  ${YELLOW}uninstall${NC}   Remove the Grubtale theme (requires root)"
-    echo -e "  ${YELLOW}preview${NC}     Generate a preview of the theme"
-    echo -e "  ${YELLOW}generate${NC}    Generate background image only"
-    echo -e "  ${YELLOW}help${NC}        Show this help message"
+    echo -e "  ${YELLOW}install${NC}        Install the Grubtale theme with boot-time service (requires root)"
+    echo -e "  ${YELLOW}uninstall${NC}      Remove the Grubtale theme and service (requires root)"
+    echo -e "  ${YELLOW}update-theme${NC}   Update theme with current system info (for service use)"
+    echo -e "  ${YELLOW}help${NC}           Show this help message"
     echo
     echo -e "${GREEN}Examples:${NC}"
-    echo -e "  $0 preview"
     echo -e "  sudo $0 install"
     echo -e "  sudo $0 uninstall"
     echo
@@ -256,12 +437,8 @@ while (( "${#}" > 0 )) ; do
             OPTION="uninstall"
             shift
             ;;
-        "preview")
-            OPTION="preview"
-            shift
-            ;;
-        "generate")
-            OPTION="generate"
+        "update-theme")
+            OPTION="update-theme"
             shift
             ;;
         "help"|"-h"|"--help")
@@ -280,22 +457,14 @@ done
 case "${OPTION,,}" in
     "install")
         print_logo
-        check_dependencies
-        install_theme
+        install
         ;;
     "uninstall")
         print_logo
-        uninstall_theme
+        uninstall
         ;;
-    "preview")
-        print_logo
-        check_dependencies
-        preview_theme
-        ;;
-    "generate")
-        print_logo
-        check_dependencies
-        generate_background "$BACKGROUND_IMAGE" "background.png"
+    "update-theme")
+        update_theme
         ;;
     "help"|*)
         show_help

@@ -2,6 +2,7 @@
 Description=Grubtale Theme Background Generator
 Documentation=https://github.com/lazypwny751/grubtale
 After=network.target
+Wants=grubtale.timer
 
 [Service]
 Type=oneshot
@@ -10,6 +11,7 @@ WorkingDirectory=/usr/local/share/grubtale
 ExecStart=/usr/local/share/grubtale/grubtale.sh generate
 StandardOutput=journal
 StandardError=journal
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
