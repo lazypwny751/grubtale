@@ -1,0 +1,47 @@
+title-text: "Grubtale"
+title-color: "#ffffffff"
+title-font: "Determination Mono Regular 24"
+desktop-color: "#000000ff"
+
++ boot_menu {
+    left = 15%
+    top = 25%
+    width = 70%
+    height = 60%
+
+    menu_pixmap_style = "menu_*.png"
+    item_font = "Determination Mono Regular 18"
+    item_color = "#ffffffff"
+    selected_item_color = "#808080"
+    item_height = 28
+    item_padding = 16
+    item_spacing = 6
+}
+
++ label {
+	id = "__timeout__"
+	
+	left = 50%
+	top = 100%-50
+	height = 24
+	width = 50%-6	
+	
+	text = "Boot selected option after %d seconds"
+	align = "right"
+	font = "Determination Mono Regular 14"
+	color = "white"
+}
+
++ label {
+    id = "__version__"
+    
+    left = 6
+    bottom = 6
+    height = 24
+    width = 50%-6
+
+    text = "Grubtale v1.0.0"
+    align = "left"
+    font = "Determination Mono Regular 14"
+    color = "#ffffffff"
+}
