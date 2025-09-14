@@ -25,7 +25,7 @@ desktop-image: "background.png"
     left = 1%
 
     id = "__timeout__"
-    text = "QUITTING.. %d/30"
+    text = "QUITTING.. %d/@timeout"
     align = "right"
     font = "Determination Mono Regular 18"
     color = "white"
@@ -43,7 +43,7 @@ desktop-image: "background.png"
         top = 4%
         left = 3%
 
-        text = "pingu"
+        text = "@user"
         align = "left"
         font = "Determination Mono Regular 24"
         color = "#ffffffff"
@@ -54,7 +54,7 @@ desktop-image: "background.png"
         top = 11%
         left = 3%
 
-        text = "VER  2"
+        text = "VER  @ver"
         align = "left"
         font = "Determination Mono Regular 18"
         color = "#ffffffff"
@@ -76,7 +76,7 @@ desktop-image: "background.png"
         top = 19%
         left = 3%
 
-        text = "PKG  4336"
+        text = "PKG  @pkg"
         align = "left"
         font = "Determination Mono Regular 18"
         color = "#ffffffff"
@@ -100,7 +100,7 @@ desktop-image: "background.png"
         top = 7%
         left = 7%
 
-        text = "Mint"
+        text = "@os"
         align = "left"
         font = "Determination Mono Regular 24"
         color = "#ffffffff"
@@ -111,7 +111,7 @@ desktop-image: "background.png"
         top = 15%
         left = 7%
 
-        text = "2 Core"
+        text = "@cpu"
         align = "left"
         font = "Determination Mono Regular 24"
         color = "#ffffffff"
@@ -122,7 +122,7 @@ desktop-image: "background.png"
         top = 23%
         left = 7%
 
-        text = "7.7 GiB"
+        text = "@mem"
         align = "left"
         font = "Determination Mono Regular 24"
         color = "#ffffffff"

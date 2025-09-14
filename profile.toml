@@ -1,0 +1,39 @@
+[settings]
+assets = "assets/1x1"
+
+[default]
+# user    = "frisk"
+# ver     = 2
+# os      = "Mint"
+# cpu     = 2
+# mem     = "8 GiB"
+timeout = 30
+
+[theme]
+font = "24"
+
+[boot_menu]
+top    = "10%"
+left   = "25%"
+height = "70%"
+width  = "60%"
+font   = "24"
+
+[user]
+top     = "10%"
+left    = "3%"
+width   = "70%"
+height  = "70%"
+user    = { top = "4%", left = "3%", font = "24" }
+version = { top = "11%", left = "3%", font = "18" }
+hp      = { top = "15%", left = "3%", font = "18" }
+pkg     = { top = "19%", left = "3%", font = "18" }
+
+[state]
+top = "30%"
+left = "3%"
+width = "70%"
+height = "70%"
+operating_system = { top = "7%", left = "7%", font = "24" }
+cpu              = { top = "15%", left = "7%", font = "24" }
+memory           = { top = "23%", left = "7%", font = "24" }
