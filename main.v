@@ -25,6 +25,7 @@ fn main() {
         println('The following flags could not be mapped to any fields on the struct: ${no_matches}')
     }
 
+    // Handle flags.
     if flags.show_help {
         documentation := flag.to_doc[Flags]()!
         println(documentation)
@@ -34,11 +35,14 @@ fn main() {
         exit(0)
     }
 
-    // Profile.
+    // Profiling.
     if os.exists(flags.config_path) {
-        profile := toml.parse_text(os.read_file(flags.config_path) or {""})!
+        cfg := toml.parse_text(os.read_file(flags.config_path) or {""})!
+        println(sectioner.parse_config(cfg)!)
     } else {
+        // Profile config required because all the resolution configurations is done there.
         eprintln('Configuration file not found at path: ${flags.config_path}')
+        exit(1)
     }
 
     // Test Templating.
