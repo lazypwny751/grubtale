@@ -13,7 +13,6 @@ struct BootMenu {
 	width  string
 }
 
-
 struct User {
 	top	    string
 	left    string
@@ -33,6 +32,11 @@ struct State {
 	operating_system map[string]string
 	cpu              map[string]string
 	memory           map[string]string
+}
+
+struct General {
+	background_image string
+	theme            Theme
 }
 
 pub struct Config {

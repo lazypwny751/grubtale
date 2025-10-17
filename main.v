@@ -13,7 +13,7 @@ import lib.sectioner
 @[name: "Grubtale"]
 struct Flags {
     show_help    bool   @[short: h; long: "help"; xdoc: "Show this help message and exit."]
-    cli_mode     bool   @[short: c; long: "cli"; xdoc: "Run in CLI mode without graphical interface."]
+    cli_mode     bool   @[short: c; long: "cli"; xdoc: "Run in CLI mode use a tui."]
     theme_path   string = '/boot/grub/themes/grubtale' @[short: d; long: "directory"; xdoc: "Path to the GRUB theme directory."]
     config_path  string = 'profile.toml' @[short: p; long: "config"; xdoc: "Path to the configuration file."]
 }
