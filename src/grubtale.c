@@ -5,7 +5,7 @@
 #include "grubtale.h"
 
 void help_message(void) {
-	printf("Grubtale - undertale Grub theme.\n");
+	printf("Grubtale - undertale GNU/Grub theme.\n");
 	printf("Usage: grubtale -m <multiplier> -o <output_directory>\n");
 	printf("Options:\n");
 	printf("  --multiplier, -m <multiplier>        Specify the multiplier number\n");
