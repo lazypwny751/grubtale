@@ -7,21 +7,12 @@ An Undertale-inspired GRUB theme that fills your boot process with **DETERMINATI
 ## Compile the engine.
 ```
 git clone "https://github.com/lazypwny751/grubtale.git" cd "grubtale"
-make all
-```
-
-## Run self-install.
-```
-./grubtale -S -p "/boot/grub/themes" -s <systemd/sysvinit>
 ```
 
 ## Requirements
 
-- gcc/clang
-- make
-- libcairo2
-- stdlib
-- getopt
+- perl
+- libimage-magick-perl
 
 # License
 
