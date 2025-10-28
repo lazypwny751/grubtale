@@ -3,13 +3,10 @@ BINOUT := grubtale
 
 all: build
 
-run:
-	./$(BINOUT) --cli
-
 build:
-	v . -o $(BINOUT)
+	$(CC) "src/main.c" "src/grubtale.c" -o "$(BINOUT)" `pkg-config --cflags --libs cairo`
 
 clean:
-	rm $(BINOUT)
+	rm "$(BINOUT)"
 
-.PHONY: all build
+.PHONY: all clean
