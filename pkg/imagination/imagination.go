@@ -2,7 +2,10 @@ package imagination
 
 import (
 	"os"
+	"fmt"
 	"image"
+
+	"math/rand"
 	"image/png"
 	// "image/draw"
 	"image/color"
@@ -18,7 +21,7 @@ type BackgroundConfig struct {
 	FontFile    string
 	TextColor   color.Color
 	BgColor     color.Color
-	BgImages    map[string]string
+	BgImages    []string
 }
 
 type UserConfig struct {
@@ -28,7 +31,7 @@ type UserConfig struct {
 	ImagePath  string
 
 	UserTitle  string      // Gece
-	Version    int         // 1.0.0
+	Version    string      // 1.0.0
 	Hp         string      // 20/20
 	Pkg        int         // 2386
 }
@@ -71,5 +74,11 @@ func SaveImage(img image.Image, path string) error {
 }
 
 func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, stat_config StatConfig) (error) {
+	// Random background selection
+	bg_img := bg_config.BgImages[rand.Intn(len(bg_config.BgImages))]
+	if _, err := os.Stat(bg_img); os.IsNotExist(err) {
+		return fmt.Errorf("background image %s does not exist", bg_img)
+	}
+
 	return nil
 }

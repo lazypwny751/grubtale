@@ -44,13 +44,36 @@ func main() {
 		FontFile:  "assets/ttf/determination-mono/determination-mono.ttf",
 		TextColor: color.RGBA{255, 255, 255, 255},
 		BgColor:   nil,
-		BgImages:  map[string]string{
-			"before-muffet": "assets/background/before-muffet.png",
-			"muffet-home-door": "assets/background/muffet-home-door.png",
+		BgImages:  []string{
+			"assets/background/before-muffet.png",
+			"assets/background/muffet-home-door.png",
 		},
 	}
 
-	if err := imagination.Generator(filepath.Join(*flags.Output, "background.png"), backgroundConfig); err != nil {
+	userConfig := imagination.UserConfig{
+		X_pos:     50,
+		Y_pos:     50,
+		FontSize:  24,
+		ImagePath: "assets/png/user.png",
+
+		UserTitle: "Gece",
+		Version:   "1.0.0",
+		Hp:        "20/20",
+		Pkg:       2386,
+	}
+
+	statConfig := imagination.StatConfig{
+		X_pos:     50,
+		Y_pos:     150,
+		FontSize:  18,
+		ImagePath: "assets/png/stat.png",
+
+		OsName:  "Mint 20.3",
+		Cpu:     "intel i3-10100",
+		Memory:  "8 GB",
+	}
+
+	if err := imagination.Generator(filepath.Join(*flags.Output, "background.png"), backgroundConfig, userConfig, statConfig); err != nil {
 		slog.Error("img", "Could not generate background image", "error", err)
 		return
 	}
@@ -77,5 +100,5 @@ func main() {
 
 	// =* Generate theme data. *=//
 	themeData := theme.GenerateTheme(generalThemeConfig, bootThemeConfig, timeoutThemeConfig)
-	fmt.Println(themeData)
+	fmt.Printf(themeData)
 }
