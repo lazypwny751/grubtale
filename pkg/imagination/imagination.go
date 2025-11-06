@@ -4,14 +4,22 @@ import (
 	"os"
 	"image"
 	"image/png"
-	"image/draw"
+	// "image/draw"
 	"image/color"
-	"path/filepath"
 
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
-	"golang.org/x/image/math/fixed"
+	// "golang.org/x/image/font"
+	// "golang.org/x/image/font/basicfont"
+	// "golang.org/x/image/math/fixed"
 )
+
+type BackgroundConfig struct {
+	X_size      int
+	Y_size      int
+	FontFile    string
+	TextColor   color.Color
+	BgColor     color.Color
+	BgImages    map[string]string
+}
 
 type UserConfig struct {
 	X_pos      int
@@ -21,7 +29,7 @@ type UserConfig struct {
 
 	UserTitle  string      // Gece
 	Version    int         // 1.0.0
-	Hp         (int, int)  // 20/20
+	Hp         string      // 20/20
 	Pkg        int         // 2386
 }
 
@@ -29,20 +37,11 @@ type StatConfig struct {
 	X_pos      int
 	Y_pos      int
 	FontSize   int
-	ImagePath  map[string]string
+	ImagePath  string
 
 	OsName     string      // Mint 20.3
 	Cpu        string      // intel i3-10100
 	Memory     string      // 8 GB
-}
-
-type ImageConfig struct {
-	X_size      int
-	Y_size      int
-	FontFile    string
-	TextColor   color.Color
-	BgColor     color.Color
-	BgImages    map[string]image.Image
 }
 
 // Public helpers for image manipulation.
@@ -71,20 +70,6 @@ func SaveImage(img image.Image, path string) error {
 	return png.Encode(file, img)
 }
 
-func DrawText(img draw.Image, text string, x, y int, col color.Color) {
-	point := fixed.Point26_6{
-		X: fixed.I(x),
-		Y: fixed.I(y),
-	}
-	d := &font.Drawer{
-		Dst:  img,
-		Src:  image.NewUniform(col),
-		Face: basicfont.Face7x13,
-		Dot:  point,
-	}
-	d.DrawString(text)
-}
-
-func Generator(...) (error) {
+func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, stat_config StatConfig) (error) {
 	return nil
 }
