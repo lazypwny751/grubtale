@@ -72,18 +72,18 @@ func main() {
 			Title:     "", // *flags.Title
 			CountDown: 20,
 			BgFile:    "background.png",
-			FontSize:  24,
+			FontSize:  32,
 		},
 		Boot: theme.BootThemeConfig{
 			Top:      10,
 			Left:     35,
 			Width:    60,
 			Height:   80,
-			FontSize: 24,
+			FontSize: 32,
 		},
 		Timeout: theme.TimeoutThemeConfig{
 			Duration: 30,
-			FontSize: 16,
+			FontSize: 24,
 		},
 	}
 
@@ -132,8 +132,14 @@ func main() {
 		grubtaleConfig.Boot.ItemSpacing = int(6 * scale)
 	}
 	// Scale font size if it's the default
-	if grubtaleConfig.Boot.FontSize == 24 {
-		grubtaleConfig.Boot.FontSize = int(24 * scale)
+	if grubtaleConfig.General.FontSize == 32 {
+		grubtaleConfig.General.FontSize = getClosestFontSize(int(32 * scale))
+	}
+	if grubtaleConfig.Boot.FontSize == 32 {
+		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(32 * scale))
+	}
+	if grubtaleConfig.Timeout.FontSize == 24 {
+		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(24 * scale))
 	}
 
 	// =* Generate background file. *=//
@@ -153,7 +159,7 @@ func main() {
 	}
 
 	userConfig := imagination.UserConfig{
-		FontSize:  24,
+		FontSize:  int(24 * scale),
 		ImagePath: userImg,
 
 		UserTitle: userTitle,
@@ -162,7 +168,7 @@ func main() {
 	}
 
 	statConfig := imagination.StatConfig{
-		FontSize:  18,
+		FontSize:  int(16 * scale),
 		ImagePath: statImg,
 
 		OsName: generator.GetOSName(),
@@ -234,4 +240,25 @@ func main() {
 			}
 		}
 	}
+}
+
+func getClosestFontSize(size int) int {
+	available := []int{16, 24, 32, 44, 64}
+	closest := available[0]
+	minDiff := abs(size - closest)
+	for _, s := range available {
+		diff := abs(size - s)
+		if diff <= minDiff {
+			minDiff = diff
+			closest = s
+		}
+	}
+	return closest
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
