@@ -15,11 +15,11 @@ After that you can modify your "grub" file which at "/etc/default/grub", find(if
 
 ```sh
 GRUB_THEME="/boot/grub/themes/Grubtale/theme.txt"
-ª if you're using grub2
+# if you're using grub2
 GRUB_THEME="/boot/grub2/themes/Grubtale/theme.txt"
 ``` 
 
-save and exit, now you can type `sudo update-grub` or if you use arch derivates (`grub-mkconfig -o /boot/grub/grub.cfg` or `grub2-mkconfig`)
+save and exit, now you can type `sudo update-grub` but if you use arch linux derivates type (`grub-mkconfig -o /boot/grub/grub.cfg` or `grub2-mkconfig`)
 
 ## Requirements
 
