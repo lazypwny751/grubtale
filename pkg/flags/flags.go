@@ -14,6 +14,12 @@ var (
 		"Grubtale",
 		"theme title",
 	)
+
+	Config = flag.String(
+		"config",
+		"",
+		"path to configuration file (json)",
+	)
 )
 
 func Parse() {

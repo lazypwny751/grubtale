@@ -4,30 +4,38 @@ import "fmt"
 
 // Theme configuration structures.
 type GeneralThemeConfig struct {
-	Title       string
-	CountDown   int
-	BgFile     string
-	FontSize   int
+	Title     string `json:"title"`
+	CountDown int    `json:"count_down"`
+	BgFile    string `json:"bg_file"`
+	FontSize  int    `json:"font_size"`
 }
 
 type BootThemeConfig struct {
-	Top int
-	Left int
-	FontSize int
+	Top      int `json:"top"`
+	Left     int `json:"left"`
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	FontSize int `json:"font_size"`
 }
 
 type TimeoutThemeConfig struct {
-	Duration int
-	FontSize int
+	Duration int `json:"duration"`
+	FontSize int `json:"font_size"`
+}
+
+type GrubtaleConfig struct {
+	General GeneralThemeConfig `json:"general"`
+	Boot    BootThemeConfig    `json:"boot"`
+	Timeout TimeoutThemeConfig `json:"timeout"`
 }
 
 // GenerateTheme generates the theme configuration based on the provided general configuration.
-func GenerateTheme(general_conf GeneralThemeConfig, boot_conf BootThemeConfig, timeout_conf TimeoutThemeConfig) string {
-	theme := general(general_conf)
+func GenerateTheme(generalConf GeneralThemeConfig, bootConf BootThemeConfig, timeoutConf TimeoutThemeConfig) string {
+	theme := general(generalConf)
 	theme += "\n"
-	theme += boot_menu(boot_conf)
+	theme += bootMenu(bootConf)
 	theme += "\n"
-	theme += timeout(timeout_conf)
+	theme += timeoutSection(timeoutConf)
 
 	return theme
 }
@@ -64,7 +72,7 @@ func general(config GeneralThemeConfig) string {
 	return theme
 }
 
-func boot_menu(config BootThemeConfig) string {
+func bootMenu(config BootThemeConfig) string {
 	// boot_menu
 	theme := fmt.Sprintf(
 		"+ boot_menu {\n",
@@ -87,14 +95,16 @@ func boot_menu(config BootThemeConfig) string {
 
 	// height
 	theme += fmt.Sprintf(
-		"   height              = %s\n",
-		"70%",
+		"   height              = %d%s\n",
+		config.Height,
+		"%",
 	)
 
 	// width
 	theme += fmt.Sprintf(
-		"   width               = %s\n",
-		"60%",
+		"   width               = %d%s\n",
+		config.Width,
+		"%",
 	)
 
 	// menu_pixmap_style
@@ -137,11 +147,11 @@ func boot_menu(config BootThemeConfig) string {
 	theme += fmt.Sprintf(
 		"}\n",
 	)
-	
+
 	return theme
 }
 
-func timeout(config TimeoutThemeConfig) string {
+func timeoutSection(config TimeoutThemeConfig) string {
 	// timeout label
 	theme := fmt.Sprintf(
 		"+ label {\n",

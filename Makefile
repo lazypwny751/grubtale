@@ -1,12 +1,15 @@
-SRC := src/main.go
+SRC := main.go
 OUT := grubtale
 
-all: build
+all: $(OUT)
 
-build:
+$(OUT):
 	go build -o $(OUT) $(SRC)
 
 clean:
 	rm -f $(OUT)
 
-.PHONY: all build clean
+test:
+	go test ./...
+
+.PHONY: all $(OUT) clean
