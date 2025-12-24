@@ -2,7 +2,9 @@
     "general": {
         "title": "Custom Grubtale",
         "count_down": 10,
-        "font_size": 32
+        "font_size": 32,
+        "width": 1920,
+        "height": 1080
     },
     "boot": {
         "top": 15,

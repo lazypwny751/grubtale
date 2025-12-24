@@ -22,6 +22,8 @@ type BackgroundConfig struct {
 	TextColor color.Color
 	BgColor   color.Color
 	BgImages  [][]byte
+	Width     int
+	Height    int
 }
 
 type UserConfig struct {
@@ -62,6 +64,20 @@ func SaveImage(img image.Image, path string) error {
 	return png.Encode(file, img)
 }
 
+func ScaleImage(data []byte, scale float64) (image.Image, error) {
+	img, err := LoadImageFromBytes(data)
+	if err != nil {
+		return nil, err
+	}
+
+	newWidth := int(float64(img.Bounds().Dx()) * scale)
+	newHeight := int(float64(img.Bounds().Dy()) * scale)
+
+	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+	xdraw.CatmullRom.Scale(dst, dst.Bounds(), img, img.Bounds(), xdraw.Over, nil)
+	return dst, nil
+}
+
 func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, stat_config StatConfig) error {
 	// Random background selection
 	bg_data := bg_config.BgImages[rand.Intn(len(bg_config.BgImages))]
@@ -69,6 +85,13 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 	bg_img, err := LoadImageFromBytes(bg_data)
 	if err != nil {
 		return fmt.Errorf("failed to decode background image: %v", err)
+	}
+
+	// Resize background if width and height are provided
+	if bg_config.Width > 0 && bg_config.Height > 0 {
+		dst := image.NewRGBA(image.Rect(0, 0, bg_config.Width, bg_config.Height))
+		xdraw.CatmullRom.Scale(dst, dst.Bounds(), bg_img, bg_img.Bounds(), xdraw.Over, nil)
+		bg_img = dst
 	}
 
 	// Create a mutable image
@@ -85,7 +108,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 	}
 
 	// Calculate responsive positions and sizes
-	// Target width for boxes: 25% of screen width (Smaller)
+	// Target width for boxes: 25% of screen width
 	targetBoxWidth := float64(width) * 0.25
 
 	// Margins
@@ -115,12 +138,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			draw.Draw(rgba, userRect, scaledUserImg, image.Point{}, draw.Over)
 
 			// Scale font size relative to box scaling
-			// Base font size was 24 for 800x600.
-			// Let's make it relative to box height or width.
-			// Or just use the provided FontSize but scaled?
-			// User provided FontSize 24. Let's scale it by the same factor we scaled the image?
-			// Assuming original image was designed for 1:1 scale.
-			scaledFontSize := float64(user_config.FontSize) * scale * 0.8 // Slightly smaller to fit
+			scaledFontSize := float64(user_config.FontSize) * scale * 0.8
 
 			face := truetype.NewFace(f, &truetype.Options{
 				Size:    scaledFontSize,

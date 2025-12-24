@@ -8,6 +8,8 @@ type GeneralThemeConfig struct {
 	CountDown int    `json:"count_down"`
 	BgFile    string `json:"bg_file"`
 	FontSize  int    `json:"font_size"`
+	Width     int    `json:"width"`
+	Height    int    `json:"height"`
 }
 
 type BootThemeConfig struct {

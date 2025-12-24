@@ -65,43 +65,6 @@ func main() {
 		return
 	}
 
-	// =* Generate background file. *=//
-	backgroundConfig := imagination.BackgroundConfig{
-		FontFile:  fontData,
-		TextColor: color.RGBA{255, 255, 255, 255},
-		BgColor:   nil,
-		BgImages:  [][]byte{bg1, bg2},
-	}
-
-	// Determine User Title
-	userTitle := generator.GetHostname()
-	if *flags.Title != "Grubtale" {
-		userTitle = *flags.Title
-	}
-
-	userConfig := imagination.UserConfig{
-		FontSize:  24,
-		ImagePath: userImg,
-
-		UserTitle: userTitle,
-		Version:   "1.0.0",
-		Pkg:       generator.GetPackageCount(),
-	}
-
-	statConfig := imagination.StatConfig{
-		FontSize:  18,
-		ImagePath: statImg,
-
-		OsName: generator.GetOSName(),
-		Cpu:    generator.GetCPUInfo(),
-		Memory: "GRUBTALE",
-	}
-
-	if err := imagination.Generator(filepath.Join(*flags.Output, "background.png"), backgroundConfig, userConfig, statConfig); err != nil {
-		slog.Error("Could not generate background image", "error", err)
-		return
-	}
-
 	// =* Generate theme configuration. *=//
 	// Default configuration
 	grubtaleConfig := theme.GrubtaleConfig{
@@ -137,6 +100,47 @@ func main() {
 		}
 	}
 
+	// =* Generate background file. *=//
+	backgroundConfig := imagination.BackgroundConfig{
+		FontFile:  fontData,
+		TextColor: color.RGBA{255, 255, 255, 255},
+		BgColor:   nil,
+		BgImages:  [][]byte{bg1, bg2},
+		Width:     grubtaleConfig.General.Width,
+		Height:    grubtaleConfig.General.Height,
+	}
+
+	// Determine User Title
+	userTitle := generator.GetHostname()
+	if *flags.Title != "Grubtale" {
+		userTitle = *flags.Title
+	}
+
+	userConfig := imagination.UserConfig{
+		FontSize:  24,
+		ImagePath: userImg,
+
+		UserTitle: userTitle,
+		Version:   "1.0.0",
+		Pkg:       generator.GetPackageCount(),
+	}
+
+	statConfig := imagination.StatConfig{
+		FontSize:  18,
+		ImagePath: statImg,
+
+		OsName: generator.GetOSName(),
+		Cpu:    generator.GetCPUInfo(),
+		Memory: "GRUBTALE",
+	}
+
+	if err := imagination.Generator(filepath.Join(*flags.Output, "background.png"), backgroundConfig, userConfig, statConfig); err != nil {
+		slog.Error("Could not generate background image", "error", err)
+		return
+	}
+
+
+
 	// =* Generate theme data. *=//
 	themeData := theme.GenerateTheme(grubtaleConfig.General, grubtaleConfig.Boot, grubtaleConfig.Timeout)
 
@@ -154,13 +158,42 @@ func main() {
 		"menu_nw.png", "menu_s.png", "menu_se.png", "menu_sw.png", "menu_w.png",
 	}
 
+	// Calculate scale factor for menu images
+	bgWidth := grubtaleConfig.General.Width
+	if bgWidth == 0 {
+		// If not specified, use the original background width
+		img, err := imagination.LoadImageFromBytes(bg1)
+		if err == nil {
+			bgWidth = img.Bounds().Dx()
+		} else {
+			bgWidth = 1920 // Fallback
+		}
+	}
+
+	var scale float64 = 1.0
+	if bgWidth > 0 {
+		userImgDecoded, err := imagination.LoadImageFromBytes(userImg)
+		if err == nil {
+			targetBoxWidth := float64(bgWidth) * 0.25
+			scale = targetBoxWidth / float64(userImgDecoded.Bounds().Dx())
+		}
+	}
+
 	for _, file := range menuFiles {
 		data, err := assets.ReadFile("png/" + file)
 		if err != nil {
 			slog.Error("Could not read menu asset", "file", file, "error", err)
 			continue
 		}
-		if err := os.WriteFile(filepath.Join(*flags.Output, file), data, 0644); err != nil {
+
+		// Resize menu image
+		scaledImg, err := imagination.ScaleImage(data, scale)
+		if err != nil {
+			slog.Error("Could not scale menu asset", "file", file, "error", err)
+			continue
+		}
+
+		if err := imagination.SaveImage(scaledImg, filepath.Join(*flags.Output, file)); err != nil {
 			slog.Error("Could not write menu asset", "file", file, "error", err)
 		}
 	}
