@@ -100,6 +100,42 @@ func main() {
 		}
 	}
 
+	// Calculate scale factor
+	bgWidth := grubtaleConfig.General.Width
+	if bgWidth == 0 {
+		// If not specified, use the original background width
+		img, err := imagination.LoadImageFromBytes(bg1)
+		if err == nil {
+			bgWidth = img.Bounds().Dx()
+		} else {
+			bgWidth = 1920 // Fallback
+		}
+	}
+
+	var scale float64 = 1.0
+	if bgWidth > 0 {
+		userImgDecoded, err := imagination.LoadImageFromBytes(userImg)
+		if err == nil {
+			targetBoxWidth := float64(bgWidth) * 0.25
+			scale = targetBoxWidth / float64(userImgDecoded.Bounds().Dx())
+		}
+	}
+
+	// Update Boot Config with scaled values
+	if grubtaleConfig.Boot.ItemHeight == 0 {
+		grubtaleConfig.Boot.ItemHeight = int(28 * scale)
+	}
+	if grubtaleConfig.Boot.ItemPadding == 0 {
+		grubtaleConfig.Boot.ItemPadding = int(16 * scale)
+	}
+	if grubtaleConfig.Boot.ItemSpacing == 0 {
+		grubtaleConfig.Boot.ItemSpacing = int(6 * scale)
+	}
+	// Scale font size if it's the default
+	if grubtaleConfig.Boot.FontSize == 24 {
+		grubtaleConfig.Boot.FontSize = int(24 * scale)
+	}
+
 	// =* Generate background file. *=//
 	backgroundConfig := imagination.BackgroundConfig{
 		FontFile:  fontData,
@@ -158,27 +194,6 @@ func main() {
 		"menu_nw.png", "menu_s.png", "menu_se.png", "menu_sw.png", "menu_w.png",
 	}
 
-	// Calculate scale factor for menu images
-	bgWidth := grubtaleConfig.General.Width
-	if bgWidth == 0 {
-		// If not specified, use the original background width
-		img, err := imagination.LoadImageFromBytes(bg1)
-		if err == nil {
-			bgWidth = img.Bounds().Dx()
-		} else {
-			bgWidth = 1920 // Fallback
-		}
-	}
-
-	var scale float64 = 1.0
-	if bgWidth > 0 {
-		userImgDecoded, err := imagination.LoadImageFromBytes(userImg)
-		if err == nil {
-			targetBoxWidth := float64(bgWidth) * 0.25
-			scale = targetBoxWidth / float64(userImgDecoded.Bounds().Dx())
-		}
-	}
-
 	for _, file := range menuFiles {
 		data, err := assets.ReadFile("png/" + file)
 		if err != nil {
@@ -187,7 +202,9 @@ func main() {
 		}
 
 		// Resize menu image
-		scaledImg, err := imagination.ScaleImage(data, scale)
+		// Apply a multiplier to make them slightly larger as requested
+		menuScale := scale * 1.5
+		scaledImg, err := imagination.ScaleImage(data, menuScale)
 		if err != nil {
 			slog.Error("Could not scale menu asset", "file", file, "error", err)
 			continue

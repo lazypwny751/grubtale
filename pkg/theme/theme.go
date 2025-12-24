@@ -13,11 +13,14 @@ type GeneralThemeConfig struct {
 }
 
 type BootThemeConfig struct {
-	Top      int `json:"top"`
-	Left     int `json:"left"`
-	Width    int `json:"width"`
-	Height   int `json:"height"`
-	FontSize int `json:"font_size"`
+	Top         int `json:"top"`
+	Left        int `json:"left"`
+	Width       int `json:"width"`
+	Height      int `json:"height"`
+	FontSize    int `json:"font_size"`
+	ItemHeight  int `json:"item_height"`
+	ItemPadding int `json:"item_padding"`
+	ItemSpacing int `json:"item_spacing"`
 }
 
 type TimeoutThemeConfig struct {
@@ -132,17 +135,20 @@ func bootMenu(config BootThemeConfig) string {
 
 	// item_height
 	theme += fmt.Sprintf(
-		"   item_height         = 28\n",
+		"   item_height         = %d\n",
+		config.ItemHeight,
 	)
 
 	// item_padding
 	theme += fmt.Sprintf(
-		"   item_padding        = 16\n",
+		"   item_padding        = %d\n",
+		config.ItemPadding,
 	)
 
 	// item_spacing
 	theme += fmt.Sprintf(
-		"   item_spacing        = 6\n",
+		"   item_spacing        = %d\n",
+		config.ItemSpacing,
 	)
 
 	// end of boot_menu
