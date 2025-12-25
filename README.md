@@ -1,5 +1,7 @@
 # Grubtale
 
+<img width="794" height="599" alt="Screenshot from 2025-12-26 00-43-23" src="https://github.com/user-attachments/assets/e7e32b28-a728-4475-a44e-3078d1edc5a6" />
+
 An Undertale-inspired GRUB theme that fills your boot process with **DETERMINATION**.
 
 # Installation
