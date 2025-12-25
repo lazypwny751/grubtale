@@ -112,7 +112,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 	targetBoxWidth := float64(width) * 0.25
 
 	// Margins
-	marginX := int(float64(width) * 0.05)    // 5% margin from left
+	marginX := int(float64(width) * 0.07)    // 7% margin from left
 	marginTop := int(float64(height) * 0.10) // 10% margin from top (Aligned with menu)
 
 	// User Box Position
@@ -133,12 +133,9 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			scaledUserImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 			xdraw.CatmullRom.Scale(scaledUserImg, scaledUserImg.Bounds(), userImg, userImg.Bounds(), xdraw.Over, nil)
 
-			// Draw user image
-			userRect := image.Rect(userX, userY, userX+newWidth, userY+newHeight)
-			draw.Draw(rgba, userRect, scaledUserImg, image.Point{}, draw.Over)
-
-			// Scale font size relative to box scaling
-			scaledFontSize := float64(user_config.FontSize) * scale * 0.8
+			// Scale font size relative to box width (independent of image resolution)
+			// Increased factor to restore size while maintaining quality
+			scaledFontSize := float64(newWidth) * 0.15
 
 			face := truetype.NewFace(f, &truetype.Options{
 				Size:    scaledFontSize,
@@ -147,7 +144,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			})
 
 			d := &font.Drawer{
-				Dst:  rgba,
+				Dst:  scaledUserImg,
 				Src:  image.NewUniform(bg_config.TextColor),
 				Face: face,
 			}
@@ -158,16 +155,20 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			lineHeight := int(scaledFontSize * 1.5)
 
 			// Name (No quotes)
-			d.Dot = fixed.P(userX+paddingX, userY+paddingY)
+			d.Dot = fixed.P(paddingX, paddingY)
 			d.DrawString(user_config.UserTitle)
 
 			// VER (Version Instead of Level"LV")
-			d.Dot = fixed.P(userX+paddingX, userY+paddingY+lineHeight)
+			d.Dot = fixed.P(paddingX, paddingY+lineHeight)
 			d.DrawString(fmt.Sprintf("VER %s", user_config.Version))
 
 			// PKG (Instead of HP)
-			d.Dot = fixed.P(userX+paddingX, userY+paddingY+lineHeight*2)
+			d.Dot = fixed.P(paddingX, paddingY+lineHeight*2)
 			d.DrawString(fmt.Sprintf("PKG %d", user_config.Pkg))
+
+			// Draw user image
+			userRect := image.Rect(userX, userY, userX+newWidth, userY+newHeight)
+			draw.Draw(rgba, userRect, scaledUserImg, image.Point{}, draw.Over)
 		}
 	}
 
@@ -189,12 +190,9 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			// Align stat box with user box
 			statX := marginX
 
-			// Draw stat image
-			statRect := image.Rect(statX, statY, statX+newWidth, statY+newHeight)
-			draw.Draw(rgba, statRect, scaledStatImg, image.Point{}, draw.Over)
-
 			// Larger font for stat box content
-			scaledFontSize := float64(stat_config.FontSize) * scale * 1.1
+			// Increased factor to restore size while maintaining quality
+			scaledFontSize := float64(newWidth) * 0.145
 
 			// Draw text on stat image
 			face := truetype.NewFace(f, &truetype.Options{
@@ -204,7 +202,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			})
 
 			d := &font.Drawer{
-				Dst:  rgba,
+				Dst:  scaledStatImg,
 				Src:  image.NewUniform(bg_config.TextColor),
 				Face: face,
 			}
@@ -214,16 +212,20 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 			lineHeight := int(scaledFontSize * 1.5)
 
 			// OS Name
-			d.Dot = fixed.P(statX+paddingX, statY+paddingY)
+			d.Dot = fixed.P(paddingX, paddingY)
 			d.DrawString(stat_config.OsName)
 
 			// CPU
-			d.Dot = fixed.P(statX+paddingX, statY+paddingY+lineHeight)
+			d.Dot = fixed.P(paddingX, paddingY+lineHeight)
 			d.DrawString(stat_config.Cpu)
 
 			// Memory / GRUBTALE
-			d.Dot = fixed.P(statX+paddingX, statY+paddingY+lineHeight*2)
+			d.Dot = fixed.P(paddingX, paddingY+lineHeight*2)
 			d.DrawString(stat_config.Memory)
+
+			// Draw stat image
+			statRect := image.Rect(statX, statY, statX+newWidth, statY+newHeight)
+			draw.Draw(rgba, statRect, scaledStatImg, image.Point{}, draw.Over)
 		}
 	}
 

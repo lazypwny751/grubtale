@@ -1,7 +1,17 @@
 package main
 
-// Grubtale an undertale inspired grub theme.
-// This theme generator aims to bring the spirit of Undertale into the GRUB bootloader.
+/*
+ * Grubtale
+ *
+ * An Undertale inspired GRUB theme generator.
+ *
+ * Created by lazypwny751 & GitHub Copilot(my best friend).
+ *
+ * This project was peer-coded with AI assistance, combining human creativity
+ * with machine efficiency. Not just generated, but crafted together.
+ *
+ * Stay determined!
+ */
 
 import (
 	"encoding/json"
@@ -10,6 +20,7 @@ import (
 	"image/color"
 	"log/slog"
 	"path/filepath"
+	"strings"
 
 	"github.com/lazypwny751/grubtale/assets"
 	"github.com/lazypwny751/grubtale/pkg/flags"
@@ -22,7 +33,7 @@ func main() {
 	// Parse command line flags.
 	flags.Parse()
 
-	if err := os.MkdirAll(*flags.Output, os.ModePerm); err != nil {
+	if err := os.MkdirAll(*flags.Output, 0755); err != nil {
 		slog.Error("Could not create directory", "path", *flags.Output, "error", err)
 		return
 	}
@@ -76,7 +87,7 @@ func main() {
 		},
 		Boot: theme.BootThemeConfig{
 			Top:      10,
-			Left:     35,
+			Left:     33,
 			Width:    60,
 			Height:   80,
 			FontSize: 32,
@@ -159,7 +170,7 @@ func main() {
 	}
 
 	userConfig := imagination.UserConfig{
-		FontSize:  int(24 * scale),
+		FontSize:  24,
 		ImagePath: userImg,
 
 		UserTitle: userTitle,
@@ -168,7 +179,7 @@ func main() {
 	}
 
 	statConfig := imagination.StatConfig{
-		FontSize:  int(16 * scale),
+		FontSize:  16,
 		ImagePath: statImg,
 
 		OsName: generator.GetOSName(),
@@ -180,8 +191,6 @@ func main() {
 		slog.Error("Could not generate background image", "error", err)
 		return
 	}
-
-
 
 	// =* Generate theme data. *=//
 	themeData := theme.GenerateTheme(grubtaleConfig.General, grubtaleConfig.Boot, grubtaleConfig.Timeout)
@@ -195,29 +204,34 @@ func main() {
 	slog.Info("Generated theme.txt", "path", themePath)
 
 	// Copy menu images
-	menuFiles := []string{
-		"menu_c.png", "menu_e.png", "menu_n.png", "menu_ne.png",
-		"menu_nw.png", "menu_s.png", "menu_se.png", "menu_sw.png", "menu_w.png",
-	}
+	pngFiles, err := assets.ReadDir("png")
+	if err != nil {
+		slog.Error("Could not read png directory", "error", err)
+	} else {
+		for _, fileEntry := range pngFiles {
+			fileName := fileEntry.Name()
+			if !strings.HasPrefix(fileName, "menu_") {
+				continue
+			}
 
-	for _, file := range menuFiles {
-		data, err := assets.ReadFile("png/" + file)
-		if err != nil {
-			slog.Error("Could not read menu asset", "file", file, "error", err)
-			continue
-		}
+			data, err := assets.ReadFile("png/" + fileName)
+			if err != nil {
+				slog.Error("Could not read menu asset", "file", fileName, "error", err)
+				continue
+			}
 
-		// Resize menu image
-		// Apply a multiplier to make them slightly larger as requested
-		menuScale := scale * 1.5
-		scaledImg, err := imagination.ScaleImage(data, menuScale)
-		if err != nil {
-			slog.Error("Could not scale menu asset", "file", file, "error", err)
-			continue
-		}
+			// Resize menu image
+			// Apply a multiplier to make them slightly larger as requested
+			menuScale := scale * 1.5
+			scaledImg, err := imagination.ScaleImage(data, menuScale)
+			if err != nil {
+				slog.Error("Could not scale menu asset", "file", fileName, "error", err)
+				continue
+			}
 
-		if err := imagination.SaveImage(scaledImg, filepath.Join(*flags.Output, file)); err != nil {
-			slog.Error("Could not write menu asset", "file", file, "error", err)
+			if err := imagination.SaveImage(scaledImg, filepath.Join(*flags.Output, fileName)); err != nil {
+				slog.Error("Could not write menu asset", "file", fileName, "error", err)
+			}
 		}
 	}
 

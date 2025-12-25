@@ -110,5 +110,14 @@ func GetPackageCount() int {
 		}
 	}
 
+	// Try apk (Alpine)
+	if _, err := exec.LookPath("apk"); err == nil {
+		cmd := exec.Command("apk", "info")
+		output, err := cmd.Output()
+		if err == nil {
+			return bytes.Count(output, []byte("\n"))
+		}
+	}
+
 	return 0
 }
