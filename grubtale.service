@@ -1,0 +1,8 @@
+[Unit]
+Description=Grubtale autogen service.
+
+[Service]
+ExecStart=/bin/bash -c "echo 1 > /dev/null"
+
+[Install]
+WantedBy=multi-user.target
