@@ -169,30 +169,30 @@ func main() {
 	if bgWidth > 0 {
 		userImgDecoded, err := imagination.LoadImageFromBytes(userImg)
 		if err == nil {
-			targetBoxWidth := float64(bgWidth) * 0.25
+			targetBoxWidth := float64(bgWidth) * 0.20
 			scale = targetBoxWidth / float64(userImgDecoded.Bounds().Dx())
 		}
 	}
 
 	// Update Boot Config with scaled values
 	if grubtaleConfig.Boot.ItemHeight == 0 {
-		grubtaleConfig.Boot.ItemHeight = int(28 * scale)
+		grubtaleConfig.Boot.ItemHeight = int(18 * scale)
 	}
 	if grubtaleConfig.Boot.ItemPadding == 0 {
-		grubtaleConfig.Boot.ItemPadding = int(16 * scale)
+		grubtaleConfig.Boot.ItemPadding = int(6 * scale)
 	}
 	if grubtaleConfig.Boot.ItemSpacing == 0 {
-		grubtaleConfig.Boot.ItemSpacing = int(14 * scale)
+		grubtaleConfig.Boot.ItemSpacing = int(5 * scale)
 	}
 	// Scale font size if it's the default
 	if grubtaleConfig.General.FontSize == 32 {
-		grubtaleConfig.General.FontSize = getClosestFontSize(int(32 * scale))
+		grubtaleConfig.General.FontSize = getClosestFontSize(int(18 * scale))
 	}
 	if grubtaleConfig.Boot.FontSize == 32 {
-		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(32 * scale))
+		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(18 * scale))
 	}
 	if grubtaleConfig.Timeout.FontSize == 24 {
-		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(24 * scale))
+		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(12 * scale))
 	}
 
 	// =* Generate background file. *=//
@@ -264,7 +264,7 @@ func main() {
 
 			// Resize menu image
 			// Apply a multiplier to make them slightly larger as requested
-			menuScale := scale * 1.5
+			menuScale := scale * 1.1
 			scaledImg, err := imagination.ScaleImage(data, menuScale)
 			if err != nil {
 				slog.Error("Could not scale menu asset", "file", fileName, "error", err)
@@ -299,7 +299,7 @@ func main() {
 }
 
 func getClosestFontSize(size int) int {
-	available := []int{16, 24, 32, 44, 64}
+	available := []int{8, 16, 24, 32, 44, 64}
 	closest := available[0]
 	minDiff := abs(size - closest)
 	for _, s := range available {
