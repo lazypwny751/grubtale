@@ -6,6 +6,13 @@ An Undertale-inspired GRUB theme that fills your boot process with **DETERMINATI
 
 # Installation
 
+## Simple steps to get Grubtale up and running on your system.
+```sh
+git clone "https://github.com/lazypwny751/grubtale.git" && cd "grubtale"
+make install
+sudo ./grubtale
+```
+
 ## Compile the engine.
 ```
 git clone "https://github.com/lazypwny751/grubtale.git" cd "grubtale"
