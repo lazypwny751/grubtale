@@ -123,7 +123,7 @@ func main() {
 		},
 		Boot: theme.BootThemeConfig{
 			Top:      10,
-			Left:     34,
+			Left:     31,
 			Width:    60,
 			Height:   80,
 			FontSize: 32,

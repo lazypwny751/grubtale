@@ -108,8 +108,8 @@ func Generator(out string, bgConfig BackgroundConfig, userConfig UserConfig, sta
 	}
 
 	// Calculate responsive positions and sizes
-	// Target width for boxes: 25% of screen width
-	targetBoxWidth := float64(width) * 0.25
+	// Target width for boxes: 22% of screen width
+	targetBoxWidth := float64(width) * 0.22
 
 	// Margins
 	marginX := int(float64(width) * 0.07)    // 7% margin from left
