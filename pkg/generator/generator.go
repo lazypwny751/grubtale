@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -23,21 +24,38 @@ func GetOSName() string {
 	}
 	defer file.Close()
 
+	var id, name, prettyName string
+
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix(line, "ID=") {
-			id := strings.Trim(strings.TrimPrefix(line, "ID="), "\"")
-			// Capitalize first letter
-			if len(id) > 0 {
-				id = strings.ToUpper(id[:1]) + id[1:]
-			}
-			if strings.Contains(strings.ToLower(id), "mint") {
-				return "Mint"
-			}
-			return id
+		if strings.HasPrefix(line, "PRETTY_NAME=") {
+			prettyName = strings.Trim(strings.TrimPrefix(line, "PRETTY_NAME="), "\"")
+		} else if strings.HasPrefix(line, "NAME=") {
+			name = strings.Trim(strings.TrimPrefix(line, "NAME="), "\"")
+		} else if strings.HasPrefix(line, "ID=") {
+			id = strings.Trim(strings.TrimPrefix(line, "ID="), "\"")
 		}
 	}
+
+	if prettyName != "" {
+		// Shorten if too long
+		if len(prettyName) > 20 {
+			return prettyName[:17] + "..."
+		}
+		return prettyName
+	}
+	if name != "" {
+		return name
+	}
+	if id != "" {
+		// Capitalize first letter
+		if len(id) > 0 {
+			id = strings.ToUpper(id[:1]) + id[1:]
+		}
+		return id
+	}
+
 	return "Linux"
 }
 
@@ -120,4 +138,32 @@ func GetPackageCount() int {
 	}
 
 	return 0
+}
+
+func GetGrubTimeout() int {
+	file, err := os.Open("/etc/default/grub")
+	if err != nil {
+		return -1
+	}
+	defer file.Close()
+
+	lastVal := -1
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		if strings.HasPrefix(line, "GRUB_TIMEOUT=") {
+			valStr := strings.TrimPrefix(line, "GRUB_TIMEOUT=")
+			valStr = strings.Trim(valStr, "\"")
+			valStr = strings.Trim(valStr, "'")
+			val, err := strconv.Atoi(valStr)
+			if err == nil {
+				lastVal = val
+			}
+		}
+	}
+	return lastVal
 }

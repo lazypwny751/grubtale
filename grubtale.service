@@ -1,8 +1,10 @@
 [Unit]
-Description=Grubtale autogen service.
+Description=Grubtale Theme Generator
+After=local-fs.target
 
 [Service]
-ExecStart=/bin/bash -c "echo 1 > /dev/null"
+Type=oneshot
+ExecStart=/bin/sh -c 'CONFIG="/etc/grubtale/grubtale.json"; BIN="/usr/local/bin/grubtale"; OUTPUT="/boot/grub/themes/Grubtale"; if [ -f "$CONFIG" ]; then "$BIN" -config "$CONFIG"; if [ -d "$OUTPUT" ]; then cp "$CONFIG" "$OUTPUT/grubtale.json"; fi; else "$BIN"; fi'
 
 [Install]
 WantedBy=multi-user.target

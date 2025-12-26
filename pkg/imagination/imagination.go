@@ -78,31 +78,31 @@ func ScaleImage(data []byte, scale float64) (image.Image, error) {
 	return dst, nil
 }
 
-func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, stat_config StatConfig) error {
+func Generator(out string, bgConfig BackgroundConfig, userConfig UserConfig, statConfig StatConfig) error {
 	// Random background selection
-	bg_data := bg_config.BgImages[rand.Intn(len(bg_config.BgImages))]
+	bgData := bgConfig.BgImages[rand.Intn(len(bgConfig.BgImages))]
 
-	bg_img, err := LoadImageFromBytes(bg_data)
+	bgImg, err := LoadImageFromBytes(bgData)
 	if err != nil {
 		return fmt.Errorf("failed to decode background image: %v", err)
 	}
 
 	// Resize background if width and height are provided
-	if bg_config.Width > 0 && bg_config.Height > 0 {
-		dst := image.NewRGBA(image.Rect(0, 0, bg_config.Width, bg_config.Height))
-		xdraw.CatmullRom.Scale(dst, dst.Bounds(), bg_img, bg_img.Bounds(), xdraw.Over, nil)
-		bg_img = dst
+	if bgConfig.Width > 0 && bgConfig.Height > 0 {
+		dst := image.NewRGBA(image.Rect(0, 0, bgConfig.Width, bgConfig.Height))
+		xdraw.CatmullRom.Scale(dst, dst.Bounds(), bgImg, bgImg.Bounds(), xdraw.Over, nil)
+		bgImg = dst
 	}
 
 	// Create a mutable image
-	bounds := bg_img.Bounds()
+	bounds := bgImg.Bounds()
 	width := bounds.Dx()
 	height := bounds.Dy()
 	rgba := image.NewRGBA(bounds)
-	draw.Draw(rgba, bounds, bg_img, image.Point{}, draw.Src)
+	draw.Draw(rgba, bounds, bgImg, image.Point{}, draw.Src)
 
 	// Load Font
-	f, err := truetype.Parse(bg_config.FontFile)
+	f, err := truetype.Parse(bgConfig.FontFile)
 	if err != nil {
 		return fmt.Errorf("failed to parse font: %v", err)
 	}
@@ -121,8 +121,8 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 	var userHeight int
 
 	// Draw User Config (User Box)
-	if len(user_config.ImagePath) > 0 {
-		userImg, err := LoadImageFromBytes(user_config.ImagePath)
+	if len(userConfig.ImagePath) > 0 {
+		userImg, err := LoadImageFromBytes(userConfig.ImagePath)
 		if err == nil {
 			// Scale user image
 			scale := targetBoxWidth / float64(userImg.Bounds().Dx())
@@ -145,7 +145,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 
 			d := &font.Drawer{
 				Dst:  scaledUserImg,
-				Src:  image.NewUniform(bg_config.TextColor),
+				Src:  image.NewUniform(bgConfig.TextColor),
 				Face: face,
 			}
 
@@ -156,15 +156,15 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 
 			// Name (No quotes)
 			d.Dot = fixed.P(paddingX, paddingY)
-			d.DrawString(user_config.UserTitle)
+			d.DrawString(userConfig.UserTitle)
 
 			// VER (Version Instead of Level"LV")
 			d.Dot = fixed.P(paddingX, paddingY+lineHeight)
-			d.DrawString(fmt.Sprintf("VER %s", user_config.Version))
+			d.DrawString(fmt.Sprintf("VER %s", userConfig.Version))
 
 			// PKG (Instead of HP)
 			d.Dot = fixed.P(paddingX, paddingY+lineHeight*2)
-			d.DrawString(fmt.Sprintf("PKG %d", user_config.Pkg))
+			d.DrawString(fmt.Sprintf("PKG %d", userConfig.Pkg))
 
 			// Draw user image
 			userRect := image.Rect(userX, userY, userX+newWidth, userY+newHeight)
@@ -176,8 +176,8 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 	statY := userY + userHeight + int(float64(height)*0.02) // 2% gap (Closer)
 
 	// Draw Stat Config (Stat Box)
-	if len(stat_config.ImagePath) > 0 {
-		statImg, err := LoadImageFromBytes(stat_config.ImagePath)
+	if len(statConfig.ImagePath) > 0 {
+		statImg, err := LoadImageFromBytes(statConfig.ImagePath)
 		if err == nil {
 			// Scale stat image
 			scale := targetBoxWidth / float64(statImg.Bounds().Dx())
@@ -203,7 +203,7 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 
 			d := &font.Drawer{
 				Dst:  scaledStatImg,
-				Src:  image.NewUniform(bg_config.TextColor),
+				Src:  image.NewUniform(bgConfig.TextColor),
 				Face: face,
 			}
 
@@ -213,15 +213,15 @@ func Generator(out string, bg_config BackgroundConfig, user_config UserConfig, s
 
 			// OS Name
 			d.Dot = fixed.P(paddingX, paddingY)
-			d.DrawString(stat_config.OsName)
+			d.DrawString(statConfig.OsName)
 
 			// CPU
 			d.Dot = fixed.P(paddingX, paddingY+lineHeight)
-			d.DrawString(stat_config.Cpu)
+			d.DrawString(statConfig.Cpu)
 
 			// Memory / GRUBTALE
 			d.Dot = fixed.P(paddingX, paddingY+lineHeight*2)
-			d.DrawString(stat_config.Memory)
+			d.DrawString(statConfig.Memory)
 
 			// Draw stat image
 			statRect := image.Rect(statX, statY, statX+newWidth, statY+newHeight)

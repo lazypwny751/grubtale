@@ -12,4 +12,7 @@ clean:
 test:
 	go test ./...
 
-.PHONY: all $(OUT) clean
+install: $(OUT)
+	sudo ./$(OUT) -install
+
+.PHONY: all $(OUT) clean test install

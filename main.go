@@ -14,6 +14,7 @@ package main
  */
 
 import (
+	"embed"
 	"encoding/json"
 	"os"
 
@@ -26,12 +27,25 @@ import (
 	"github.com/lazypwny751/grubtale/pkg/flags"
 	"github.com/lazypwny751/grubtale/pkg/generator"
 	"github.com/lazypwny751/grubtale/pkg/imagination"
+	"github.com/lazypwny751/grubtale/pkg/selfinstall"
 	"github.com/lazypwny751/grubtale/pkg/theme"
 )
+
+//go:embed grubtale.service grubtale.sh
+var serviceFiles embed.FS
 
 func main() {
 	// Parse command line flags.
 	flags.Parse()
+
+	// Handle installation
+	if *flags.Install {
+		if err := selfinstall.Install(serviceFiles, *flags.Config, *flags.GrubPath, *flags.InitSystem); err != nil {
+			slog.Error("Installation failed", "error", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	if err := os.MkdirAll(*flags.Output, 0755); err != nil {
 		slog.Error("Could not create directory", "path", *flags.Output, "error", err)
@@ -55,16 +69,32 @@ func main() {
 		slog.Error("Could not read font asset", "error", err)
 		return
 	}
-	bg1, err := assets.ReadFile("background/before-muffet.png")
+
+	// Load background images dynamically
+	var bgImages [][]byte
+	bgFiles, err := assets.ReadDir("background")
 	if err != nil {
-		slog.Error("Could not read bg asset", "error", err)
+		slog.Error("Could not read background directory", "error", err)
 		return
 	}
-	bg2, err := assets.ReadFile("background/muffet-home-door.png")
-	if err != nil {
-		slog.Error("Could not read bg asset", "error", err)
+
+	for _, file := range bgFiles {
+		if file.IsDir() || !strings.HasSuffix(strings.ToLower(file.Name()), ".png") {
+			continue
+		}
+		data, err := assets.ReadFile("background/" + file.Name())
+		if err != nil {
+			slog.Error("Could not read bg asset", "file", file.Name(), "error", err)
+			continue
+		}
+		bgImages = append(bgImages, data)
+	}
+
+	if len(bgImages) == 0 {
+		slog.Error("No background images found in assets/background")
 		return
 	}
+
 	userImg, err := assets.ReadFile("png/user.png")
 	if err != nil {
 		slog.Error("Could not read user asset", "error", err)
@@ -77,10 +107,16 @@ func main() {
 	}
 
 	// =* Generate theme configuration. *=//
+	// Determine default timeout
+	defaultTimeout := 30
+	if grubTimeout := generator.GetGrubTimeout(); grubTimeout > 0 {
+		defaultTimeout = grubTimeout
+	}
+
 	// Default configuration
 	grubtaleConfig := theme.GrubtaleConfig{
 		General: theme.GeneralThemeConfig{
-			Title:     "", // *flags.Title
+			Title:     "",
 			CountDown: 20,
 			BgFile:    "background.png",
 			FontSize:  32,
@@ -93,7 +129,7 @@ func main() {
 			FontSize: 32,
 		},
 		Timeout: theme.TimeoutThemeConfig{
-			Duration: 30,
+			Duration: defaultTimeout,
 			FontSize: 24,
 		},
 	}
@@ -111,15 +147,21 @@ func main() {
 		}
 	}
 
+	// Override with flag if provided
+	if *flags.Timeout != -1 {
+		grubtaleConfig.Timeout.Duration = *flags.Timeout
+	}
+
 	// Calculate scale factor
 	bgWidth := grubtaleConfig.General.Width
 	if bgWidth == 0 {
 		// If not specified, use the original background width
-		img, err := imagination.LoadImageFromBytes(bg1)
+		// Use the first loaded background image for reference
+		img, err := imagination.LoadImageFromBytes(bgImages[0])
 		if err == nil {
 			bgWidth = img.Bounds().Dx()
 		} else {
-			bgWidth = 1920 // Fallback
+			bgWidth = 1920 // Default fallback width
 		}
 	}
 
@@ -140,7 +182,7 @@ func main() {
 		grubtaleConfig.Boot.ItemPadding = int(16 * scale)
 	}
 	if grubtaleConfig.Boot.ItemSpacing == 0 {
-		grubtaleConfig.Boot.ItemSpacing = int(6 * scale)
+		grubtaleConfig.Boot.ItemSpacing = int(14 * scale)
 	}
 	// Scale font size if it's the default
 	if grubtaleConfig.General.FontSize == 32 {
@@ -158,7 +200,7 @@ func main() {
 		FontFile:  fontData,
 		TextColor: color.RGBA{255, 255, 255, 255},
 		BgColor:   nil,
-		BgImages:  [][]byte{bg1, bg2},
+		BgImages:  bgImages,
 		Width:     grubtaleConfig.General.Width,
 		Height:    grubtaleConfig.General.Height,
 	}
