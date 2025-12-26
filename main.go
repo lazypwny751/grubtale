@@ -176,23 +176,23 @@ func main() {
 
 	// Update Boot Config with scaled values
 	if grubtaleConfig.Boot.ItemHeight == 0 {
-		grubtaleConfig.Boot.ItemHeight = int(36 * scale)
+		grubtaleConfig.Boot.ItemHeight = int(42 * scale)
 	}
 	if grubtaleConfig.Boot.ItemPadding == 0 {
-		grubtaleConfig.Boot.ItemPadding = int(10 * scale)
+		grubtaleConfig.Boot.ItemPadding = int(12 * scale)
 	}
 	if grubtaleConfig.Boot.ItemSpacing == 0 {
-		grubtaleConfig.Boot.ItemSpacing = int(8 * scale)
+		grubtaleConfig.Boot.ItemSpacing = int(10 * scale)
 	}
 	// Scale font size if it's the default
 	if grubtaleConfig.General.FontSize == 32 {
-		grubtaleConfig.General.FontSize = getClosestFontSize(int(28 * scale))
+		grubtaleConfig.General.FontSize = getClosestFontSize(int(32 * scale))
 	}
 	if grubtaleConfig.Boot.FontSize == 32 {
-		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(28 * scale))
+		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(32 * scale))
 	}
 	if grubtaleConfig.Timeout.FontSize == 24 {
-		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(16 * scale))
+		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(24 * scale))
 	}
 
 	// =* Generate background file. *=//
