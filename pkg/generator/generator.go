@@ -9,6 +9,37 @@ import (
 	"strings"
 )
 
+// OS Shortnames mapping for modularity
+var osShortNames = map[string]string{
+	"ubuntu":              "Ubuntu",
+	"debian":              "Debian",
+	"arch":                "Arch",
+	"fedora":              "Fedora",
+	"linuxmint":           "Mint",
+	"manjaro":             "Manjaro",
+	"gentoo":              "Gentoo",
+	"centos":              "CentOS",
+	"rhel":                "RHEL",
+	"opensuse":            "Suse",
+	"opensuse-leap":       "Suse",
+	"opensuse-tumbleweed": "Suse",
+	"elementary":          "eOS",
+	"pop":                 "Pop!_OS",
+	"kali":                "Kali",
+	"alpine":              "Alpine",
+	"void":                "Void",
+	"nixos":               "NixOS",
+	"freebsd":             "BSD",
+	"raspbian":            "Raspbian",
+	"zorin":               "Zorin",
+	"endeavouros":         "Endeavour",
+	"garuda":              "Garuda",
+	"slackware":           "Slackware",
+	"solus":               "Solus",
+	"mageia":              "Mageia",
+	"postmarketos":        "pmOS",
+}
+
 func GetHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -35,7 +66,14 @@ func GetOSName() string {
 			name = strings.Trim(strings.TrimPrefix(line, "NAME="), "\"")
 		} else if strings.HasPrefix(line, "ID=") {
 			id = strings.Trim(strings.TrimPrefix(line, "ID="), "\"")
+			// Remove quotes if present
+			id = strings.Trim(id, "\"")
 		}
+	}
+
+	// Check for shortname first
+	if shortName, ok := osShortNames[strings.ToLower(id)]; ok {
+		return shortName
 	}
 
 	if prettyName != "" {
