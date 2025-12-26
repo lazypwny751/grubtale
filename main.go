@@ -176,23 +176,23 @@ func main() {
 
 	// Update Boot Config with scaled values
 	if grubtaleConfig.Boot.ItemHeight == 0 {
-		grubtaleConfig.Boot.ItemHeight = int(18 * scale)
+		grubtaleConfig.Boot.ItemHeight = int(36 * scale)
 	}
 	if grubtaleConfig.Boot.ItemPadding == 0 {
-		grubtaleConfig.Boot.ItemPadding = int(6 * scale)
+		grubtaleConfig.Boot.ItemPadding = int(10 * scale)
 	}
 	if grubtaleConfig.Boot.ItemSpacing == 0 {
-		grubtaleConfig.Boot.ItemSpacing = int(5 * scale)
+		grubtaleConfig.Boot.ItemSpacing = int(8 * scale)
 	}
 	// Scale font size if it's the default
 	if grubtaleConfig.General.FontSize == 32 {
-		grubtaleConfig.General.FontSize = getClosestFontSize(int(18 * scale))
+		grubtaleConfig.General.FontSize = getClosestFontSize(int(28 * scale))
 	}
 	if grubtaleConfig.Boot.FontSize == 32 {
-		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(18 * scale))
+		grubtaleConfig.Boot.FontSize = getClosestFontSize(int(28 * scale))
 	}
 	if grubtaleConfig.Timeout.FontSize == 24 {
-		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(12 * scale))
+		grubtaleConfig.Timeout.FontSize = getClosestFontSize(int(16 * scale))
 	}
 
 	// =* Generate background file. *=//
@@ -264,7 +264,7 @@ func main() {
 
 			// Resize menu image
 			// Apply a multiplier to make them slightly larger as requested
-			menuScale := scale * 1.1
+			menuScale := scale * 1.5
 			scaledImg, err := imagination.ScaleImage(data, menuScale)
 			if err != nil {
 				slog.Error("Could not scale menu asset", "file", fileName, "error", err)
